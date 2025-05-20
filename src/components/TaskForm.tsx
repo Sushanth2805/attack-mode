@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { CalendarIcon, Plus } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { PriorityHigh, PriorityMedium, PriorityLow } from '@/components/PriorityIcons';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,9 +39,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  ToggleGroup,
-  ToggleGroupItem
-} from "@/components/ui/toggle-group";
+  RadioGroup,
+  RadioGroupItem
+} from "@/components/ui/radio-group";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,6 +54,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { Task, Priority, TaskFormData, Category } from '@/types/task';
+import { Plus } from 'lucide-react';
 
 interface TaskFormProps {
   isOpen: boolean;
@@ -168,7 +170,7 @@ const TaskForm = ({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[500px] p-0 dark:border-gray-800">
+        <DialogContent className="sm:max-w-[500px] p-0">
           <DialogHeader className="p-6 pb-2">
             <DialogTitle className="text-xl">
               {isEditMode ? "Edit Task" : "Create New Task"}
@@ -262,48 +264,71 @@ const TaskForm = ({
                     <FormItem>
                       <FormLabel>Priority</FormLabel>
                       <FormControl>
-                        <ToggleGroup 
-                          type="single" 
+                        <RadioGroup 
                           value={field.value} 
-                          onValueChange={(value) => {
-                            if (value) field.onChange(value);
-                          }}
-                          className="justify-between border rounded-md p-1 dark:border-gray-700"
+                          onValueChange={field.onChange}
+                          className="flex space-x-2"
                         >
-                          <ToggleGroupItem 
-                            value="high" 
-                            aria-label="High Priority"
-                            className={cn(
-                              "data-[state=on]:text-white data-[state=on]:bg-priority-high rounded-md transition-all",
-                              field.value !== "high" ? "text-priority-high hover:bg-red-50 dark:hover:bg-red-950/30" : ""
-                            )}
-                          >
-                            <PriorityHigh className="h-4 w-4 mr-1" />
-                            High
-                          </ToggleGroupItem>
-                          <ToggleGroupItem 
-                            value="medium" 
-                            aria-label="Medium Priority"
-                            className={cn(
-                              "data-[state=on]:text-white data-[state=on]:bg-priority-medium rounded-md transition-all",
-                              field.value !== "medium" ? "text-priority-medium hover:bg-amber-50 dark:hover:bg-amber-950/30" : ""
-                            )}
-                          >
-                            <PriorityMedium className="h-4 w-4 mr-1" />
-                            Med
-                          </ToggleGroupItem>
-                          <ToggleGroupItem 
-                            value="low" 
-                            aria-label="Low Priority"
-                            className={cn(
-                              "data-[state=on]:text-white data-[state=on]:bg-priority-low rounded-md transition-all",
-                              field.value !== "low" ? "text-priority-low hover:bg-green-50 dark:hover:bg-green-950/30" : ""
-                            )}
-                          >
-                            <PriorityLow className="h-4 w-4 mr-1" />
-                            Low
-                          </ToggleGroupItem>
-                        </ToggleGroup>
+                          <div className="flex items-center">
+                            <RadioGroupItem 
+                              value="high" 
+                              id="high"
+                              className="sr-only"
+                            />
+                            <label
+                              htmlFor="high"
+                              className={cn(
+                                "inline-flex items-center px-3 py-1.5 rounded-md text-sm cursor-pointer transition-colors",
+                                field.value === "high" 
+                                  ? "bg-priority-high text-white" 
+                                  : "text-priority-high border border-priority-high hover:bg-red-50"
+                              )}
+                            >
+                              <PriorityHigh className="h-3.5 w-3.5 mr-1" />
+                              High
+                            </label>
+                          </div>
+                          
+                          <div className="flex items-center">
+                            <RadioGroupItem 
+                              value="medium" 
+                              id="medium"
+                              className="sr-only"
+                            />
+                            <label
+                              htmlFor="medium"
+                              className={cn(
+                                "inline-flex items-center px-3 py-1.5 rounded-md text-sm cursor-pointer transition-colors",
+                                field.value === "medium" 
+                                  ? "bg-priority-medium text-white" 
+                                  : "text-priority-medium border border-priority-medium hover:bg-amber-50"
+                              )}
+                            >
+                              <PriorityMedium className="h-3.5 w-3.5 mr-1" />
+                              Med
+                            </label>
+                          </div>
+                          
+                          <div className="flex items-center">
+                            <RadioGroupItem 
+                              value="low" 
+                              id="low"
+                              className="sr-only"
+                            />
+                            <label
+                              htmlFor="low"
+                              className={cn(
+                                "inline-flex items-center px-3 py-1.5 rounded-md text-sm cursor-pointer transition-colors",
+                                field.value === "low" 
+                                  ? "bg-priority-low text-white" 
+                                  : "text-priority-low border border-priority-low hover:bg-green-50"
+                              )}
+                            >
+                              <PriorityLow className="h-3.5 w-3.5 mr-1" />
+                              Low
+                            </label>
+                          </div>
+                        </RadioGroup>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -323,10 +348,10 @@ const TaskForm = ({
                           value={field.value}
                           onValueChange={field.onChange}
                         >
-                          <SelectTrigger className="dark:border-gray-700">
+                          <SelectTrigger>
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
-                          <SelectContent className="dark:border-gray-700">
+                          <SelectContent>
                             {categories.map((category) => (
                               <SelectItem 
                                 key={category.id}
@@ -352,7 +377,6 @@ const TaskForm = ({
                         variant="outline" 
                         size="icon" 
                         onClick={() => setIsAddCategoryDialogOpen(true)}
-                        className="dark:border-gray-700 dark:hover:bg-gray-800"
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -366,7 +390,7 @@ const TaskForm = ({
           
           <DialogFooter className="p-6 pt-4">
             <DialogClose asChild>
-              <Button type="button" variant="outline" className="dark:border-gray-700 dark:hover:bg-gray-800">
+              <Button type="button" variant="outline">
                 Cancel
               </Button>
             </DialogClose>
@@ -385,7 +409,7 @@ const TaskForm = ({
         open={isAddCategoryDialogOpen} 
         onOpenChange={setIsAddCategoryDialogOpen}
       >
-        <AlertDialogContent className="dark:border-gray-800">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Add New Category</AlertDialogTitle>
             <AlertDialogDescription>
@@ -403,7 +427,6 @@ const TaskForm = ({
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="Enter category name"
-                className="dark:border-gray-700"
               />
             </div>
             
@@ -419,7 +442,7 @@ const TaskForm = ({
                     onClick={() => setNewCategoryColor(color)}
                     className={cn(
                       "w-8 h-8 rounded-full transition-all",
-                      newCategoryColor === color ? "ring-2 ring-foreground dark:ring-white ring-offset-2" : ""
+                      newCategoryColor === color ? "ring-2 ring-foreground ring-offset-2" : ""
                     )}
                     style={{ backgroundColor: color }}
                     aria-label={`Select ${color} color`}
@@ -430,7 +453,7 @@ const TaskForm = ({
           </div>
           
           <AlertDialogFooter>
-            <AlertDialogCancel className="dark:border-gray-700 dark:hover:bg-gray-800">Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleAddCategory}
               disabled={!newCategoryName.trim()}
