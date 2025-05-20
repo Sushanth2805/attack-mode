@@ -1,14 +1,11 @@
-
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { 
   Calendar, 
   Edit, 
-  Trash2, 
-  PriorityHigh, 
-  PriorityMedium, 
-  PriorityLow 
+  Trash2
 } from 'lucide-react';
+import { PriorityHigh, PriorityMedium, PriorityLow } from '@/components/PriorityIcons';
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
   DropdownMenu,

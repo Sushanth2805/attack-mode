@@ -16,7 +16,8 @@ import {
   SheetTitle, 
   SheetFooter 
 } from "@/components/ui/sheet";
-import { PriorityHigh, PriorityMedium, PriorityLow, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
+import { PriorityHigh, PriorityMedium, PriorityLow } from '@/components/PriorityIcons';
 import { FilterOptions } from '@/types/task';
 import { cn } from '@/lib/utils';
 

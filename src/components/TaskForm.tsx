@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { CalendarIcon, PriorityHigh, PriorityMedium, PriorityLow } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
+import { PriorityHigh, PriorityMedium, PriorityLow } from '@/components/PriorityIcons';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
