@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -36,6 +35,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
+  
+  useEffect(() => {
+    // Check URL parameters for OAuth callback
+    const url = new URL(window.location.href);
+    const hasOAuthParams = url.searchParams.has('access_token') || 
+                           url.searchParams.has('error') ||
+                           url.searchParams.has('provider');
+    
+    // If we have OAuth params, don't redirect yet as we need to process them
+    if (hasOAuthParams) {
+      return;
+    }
+    
+    // Otherwise, proceed with normal auth flow
+  }, []);
   
   if (isLoading) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
