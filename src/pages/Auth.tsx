@@ -33,12 +33,8 @@ const Auth = () => {
         <Separator className="my-6" />
         <div className="grid gap-3">
           <Link to="/auth/social" className={buttonVariants({ variant: "outline", className: "flex items-center gap-2 hover:bg-secondary/10 transition-colors" })}>
-            <Icons.gitHub className="h-5 w-5" />
-            Continue with GitHub
-          </Link>
-          <Link to="/auth/social" className={buttonVariants({ variant: "outline", className: "flex items-center gap-2 hover:bg-secondary/10 transition-colors" })}>
             <Icons.google className="h-5 w-5" />
-            Continue with Gmail
+            Sign in or sign up with Google
           </Link>
         </div>
       </div>
