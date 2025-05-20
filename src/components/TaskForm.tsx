@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -90,13 +91,36 @@ const TaskForm = ({
   const form = useForm<z.infer<typeof taskFormSchema>>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
-      title: taskToEdit?.title || "",
-      description: taskToEdit?.description || "",
-      dueDate: taskToEdit?.dueDate ? new Date(taskToEdit.dueDate) : undefined,
-      priority: taskToEdit?.priority || "medium",
-      categoryId: taskToEdit?.categoryId,
+      title: "",
+      description: "",
+      dueDate: undefined,
+      priority: "medium",
+      categoryId: undefined,
     },
   });
+
+  // Reset form when taskToEdit changes or dialog opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      if (taskToEdit) {
+        form.reset({
+          title: taskToEdit.title || "",
+          description: taskToEdit.description || "",
+          dueDate: taskToEdit.dueDate ? new Date(taskToEdit.dueDate) : undefined,
+          priority: taskToEdit.priority || "medium",
+          categoryId: taskToEdit.categoryId || undefined,
+        });
+      } else {
+        form.reset({
+          title: "",
+          description: "",
+          dueDate: undefined,
+          priority: "medium",
+          categoryId: undefined,
+        });
+      }
+    }
+  }, [isOpen, taskToEdit, form]);
 
   const handleSubmit = (data: z.infer<typeof taskFormSchema>) => {
     const taskData: TaskFormData = {
@@ -251,7 +275,7 @@ const TaskForm = ({
                             value="high" 
                             aria-label="High Priority"
                             className={cn(
-                              "data-[state=on]:text-white data-[state=on]:bg-priority-high flex-1",
+                              "data-[state=on]:text-white data-[state=on]:bg-priority-high flex-1 px-3",
                               field.value !== "high" && "text-priority-high"
                             )}
                           >
@@ -262,7 +286,7 @@ const TaskForm = ({
                             value="medium" 
                             aria-label="Medium Priority"
                             className={cn(
-                              "data-[state=on]:text-white data-[state=on]:bg-priority-medium flex-1",
+                              "data-[state=on]:text-white data-[state=on]:bg-priority-medium flex-1 px-3",
                               field.value !== "medium" && "text-priority-medium"
                             )}
                           >
@@ -273,7 +297,7 @@ const TaskForm = ({
                             value="low" 
                             aria-label="Low Priority"
                             className={cn(
-                              "data-[state=on]:text-white data-[state=on]:bg-priority-low flex-1",
+                              "data-[state=on]:text-white data-[state=on]:bg-priority-low flex-1 px-3",
                               field.value !== "low" && "text-priority-low"
                             )}
                           >

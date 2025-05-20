@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [hasShownWelcomeToast, setHasShownWelcomeToast] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -60,8 +61,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Handle authentication events
       if (event === 'SIGNED_IN') {
-        // Don't immediately redirect here, we'll handle this separately
-        toast.success(`Welcome${session?.user?.email ? ` ${session.user.email}` : ''}!`);
+        // Show welcome toast only once per session
+        if (!hasShownWelcomeToast) {
+          toast.success(`Welcome${session?.user?.email ? ` ${session.user.email}` : ''}!`);
+          setHasShownWelcomeToast(true);
+        }
         
         // If we're not already redirecting and not in an OAuth callback, navigate to home
         if (!isRedirecting && !isOAuthCallback) {
@@ -75,6 +79,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } else if (event === 'SIGNED_OUT') {
         navigate('/auth', { replace: true });
+        // Reset welcome toast flag on sign out
+        setHasShownWelcomeToast(false);
       } else if (event === 'USER_UPDATED') {
         toast.info('Your profile has been updated');
       } else if (event === 'TOKEN_REFRESHED') {
@@ -111,7 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, isRedirecting]);
+  }, [navigate, isRedirecting, hasShownWelcomeToast]);
 
   const signOut = async () => {
     try {
@@ -123,6 +129,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await supabase.auth.signOut({ scope: 'global' });
       
       toast.success("Logged out successfully");
+      
+      // Reset welcome toast flag
+      setHasShownWelcomeToast(false);
       
       // Navigate to auth page
       navigate('/auth', { replace: true });

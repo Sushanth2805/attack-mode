@@ -177,13 +177,7 @@ const Index = () => {
     setIsTaskFormOpen(true);
   };
   
-  // Show a welcome message when first loaded
-  useEffect(() => {
-    toast({
-      title: "Welcome to TaskFlow",
-      description: "Manage your tasks efficiently with this mobile app.",
-    });
-  }, []);
+  // Removed the welcome message that showed on every page load
   
   // Get the count of incomplete tasks for the header
   const activeTasks = tasks.filter(task => !task.completed).length;
