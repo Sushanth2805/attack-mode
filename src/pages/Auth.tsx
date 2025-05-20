@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -43,7 +43,7 @@ const signupSchema = loginSchema.extend({
 type LoginValues = z.infer<typeof loginSchema>;
 type SignupValues = z.infer<typeof signupSchema>;
 
-export default function Auth() {
+const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
@@ -362,5 +362,6 @@ export default function Auth() {
       </div>
     </div>
   );
-}
+};
 
+export default Auth;
