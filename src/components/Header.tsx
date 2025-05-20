@@ -43,10 +43,10 @@ const Header = ({
               <SheetHeader className="mb-6">
                 <div className="flex items-center">
                   <Logo size={28} className="mr-2" />
-                  <SheetTitle>TaskFlow</SheetTitle>
+                  <SheetTitle>Attack Mode</SheetTitle>
                 </div>
                 <SheetDescription>
-                  Your mobile task management app
+                  Your task management app
                 </SheetDescription>
               </SheetHeader>
               
