@@ -3,12 +3,19 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { supabase } from "@/integrations/supabase/client"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 
 // Schema for form validation
 const authFormSchema = z.object({
@@ -72,39 +79,50 @@ export function AuthForm() {
 
   return (
     <div className="grid gap-6">
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="name@example.com"
-            {...form.register("email")}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="name@example.com"
+                    type="email"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {form.formState.errors.email && (
-            <p className="text-xs text-red-500">
-              {form.formState.errors.email.message}
-            </p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            {...form.register("password")}
+          
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="••••••••"
+                    type="password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {form.formState.errors.password && (
-            <p className="text-xs text-red-500">
-              {form.formState.errors.password.message}
-            </p>
-          )}
-        </div>
-        <Button disabled={isLoading} type="submit" className="w-full">
-          {isLoading ? "Loading..." : isSignUp ? "Create Account" : "Sign In"}
-        </Button>
-      </form>
+          
+          <Button disabled={isLoading} type="submit" className="w-full">
+            {isLoading ? "Loading..." : isSignUp ? "Create Account" : "Sign In"}
+          </Button>
+        </form>
+      </Form>
+      
       <div className="text-center">
         <Button
           variant="link"
