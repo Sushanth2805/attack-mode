@@ -1,60 +1,23 @@
 
 import { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
 import TaskList from '@/components/TaskList';
 import TaskForm from '@/components/TaskForm';
 import TaskFilter from '@/components/TaskFilter';
-import { Task, TaskFormData, Priority, FilterOptions, Category } from '@/types/task';
+import { Task, TaskFormData, FilterOptions, Category } from '@/types/task';
 import { useToast } from '@/hooks/use-toast';
-import { List } from 'lucide-react';
-
-// Mock data for initial development (will be replaced with Supabase)
-const initialTasks: Task[] = [
-  {
-    id: uuidv4(),
-    title: "Complete project proposal",
-    description: "Finish writing the proposal document for the new client project",
-    dueDate: new Date(new Date().setDate(new Date().getDate() + 1)), // tomorrow
-    priority: "high",
-    completed: false,
-    categoryId: "work",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    userId: "user1" // will be replaced with actual user ID from auth
-  },
-  {
-    id: uuidv4(),
-    title: "Schedule doctor appointment",
-    description: "Call Dr. Smith's office to schedule annual checkup",
-    dueDate: new Date(new Date().setDate(new Date().getDate() + 3)),
-    priority: "medium",
-    completed: false,
-    categoryId: "personal",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    userId: "user1"
-  },
-  {
-    id: uuidv4(),
-    title: "Buy groceries",
-    description: "Pick up fresh vegetables, milk, and bread",
-    dueDate: new Date(),
-    priority: "low",
-    completed: true,
-    categoryId: "shopping",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    userId: "user1"
-  },
-];
-
-const initialCategories: Category[] = [
-  { id: "work", name: "Work", color: "#0EA5E9" },
-  { id: "personal", name: "Personal", color: "#8B5CF6" },
-  { id: "shopping", name: "Shopping", color: "#F97316" },
-];
+import { useAuth } from '@/hooks/useAuth';
+import { 
+  fetchTasks, 
+  fetchCategories, 
+  createTask, 
+  updateTask, 
+  toggleTaskComplete, 
+  deleteTask,
+  createCategory
+} from '@/services/taskService';
 
 const initialFilters: FilterOptions = {
   priority: 'all',
@@ -66,76 +29,146 @@ const initialFilters: FilterOptions = {
 
 const Index = () => {
   const { toast } = useToast();
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
-  const [filters, setFilters] = useState<FilterOptions>(initialFilters);
+  const { signOut } = useAuth();
+  const queryClient = useQueryClient();
   
+  const [filters, setFilters] = useState<FilterOptions>(initialFilters);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [isTaskFilterOpen, setIsTaskFilterOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | undefined>(undefined);
 
+  // Fetch tasks with React Query
+  const { data: tasks = [], isLoading: tasksLoading } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: fetchTasks
+  });
+
+  // Fetch categories with React Query
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories
+  });
+
+  // Create task mutation
+  const createTaskMutation = useMutation({
+    mutationFn: createTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      toast({
+        title: "Task created",
+        description: "Your task has been successfully created.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create task. Please try again.",
+        variant: "destructive"
+      });
+      console.error('Create task error:', error);
+    }
+  });
+
+  // Update task mutation
+  const updateTaskMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: TaskFormData }) => updateTask(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      toast({
+        title: "Task updated",
+        description: "Your changes have been saved.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update task. Please try again.",
+        variant: "destructive"
+      });
+      console.error('Update task error:', error);
+    }
+  });
+
+  // Toggle task completion mutation
+  const toggleTaskMutation = useMutation({
+    mutationFn: ({ id, completed }: { id: string; completed: boolean }) => 
+      toggleTaskComplete(id, completed),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update task. Please try again.",
+        variant: "destructive"
+      });
+      console.error('Toggle task error:', error);
+    }
+  });
+
+  // Delete task mutation
+  const deleteTaskMutation = useMutation({
+    mutationFn: deleteTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      toast({
+        title: "Task deleted",
+        description: "Task has been permanently removed.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete task. Please try again.",
+        variant: "destructive"
+      });
+      console.error('Delete task error:', error);
+    }
+  });
+
+  // Create category mutation
+  const createCategoryMutation = useMutation({
+    mutationFn: createCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast({
+        title: "Category created",
+        description: "New category has been created.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create category. Please try again.",
+        variant: "destructive"
+      });
+      console.error('Create category error:', error);
+    }
+  });
+
   // Function to add a new task
   const handleAddTask = (taskData: TaskFormData) => {
-    const newTask: Task = {
-      id: uuidv4(),
-      ...taskData,
-      completed: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      userId: "user1", // will be replaced with actual user ID
-    };
-    
-    setTasks(prev => [newTask, ...prev]);
-    toast({
-      title: "Task created",
-      description: "Your task has been successfully created.",
-    });
+    createTaskMutation.mutate(taskData);
   };
   
   // Function to edit a task
   const handleEditTask = (id: string, taskData: TaskFormData) => {
-    setTasks(prev => 
-      prev.map(task => 
-        task.id === id ? { 
-          ...task, 
-          ...taskData, 
-          updatedAt: new Date(),
-        } : task
-      )
-    );
-    
-    toast({
-      title: "Task updated",
-      description: "Your changes have been saved.",
-    });
+    updateTaskMutation.mutate({ id, data: taskData });
   };
   
   // Function to toggle task completion
   const handleToggleComplete = (id: string, completed: boolean) => {
-    setTasks(prev => 
-      prev.map(task => 
-        task.id === id ? { ...task, completed, updatedAt: new Date() } : task
-      )
-    );
+    toggleTaskMutation.mutate({ id, completed });
   };
   
   // Function to delete a task
   const handleDeleteTask = (id: string) => {
-    setTasks(prev => prev.filter(task => task.id !== id));
+    deleteTaskMutation.mutate(id);
   };
   
   // Function to add a category
   const handleAddCategory = (categoryData: { name: string; color?: string }) => {
-    const newCategory: Category = {
-      id: uuidv4(), // In real app, this would come from the database
-      ...categoryData,
-    };
-    
-    setCategories(prev => [...prev, newCategory]);
-    toast({
-      title: "Category created",
-      description: `"${categoryData.name}" category has been created.`,
-    });
+    createCategoryMutation.mutate(categoryData);
   };
   
   // Open the form to edit a task
@@ -144,16 +177,28 @@ const Index = () => {
     setIsTaskFormOpen(true);
   };
   
-  // Show a welcome message with app info when first loaded
+  // Show a welcome message when first loaded
   useEffect(() => {
     toast({
       title: "Welcome to TaskFlow",
-      description: "This is a mobile task manager app prototype. Connect to Supabase for full functionality.",
+      description: "Manage your tasks efficiently with this mobile app.",
     });
   }, []);
   
   // Get the count of incomplete tasks for the header
   const activeTasks = tasks.filter(task => !task.completed).length;
+
+  // Loading state
+  if (tasksLoading || categoriesLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p>Loading your tasks...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -163,6 +208,7 @@ const Index = () => {
           setIsTaskFormOpen(true);
         }}
         onToggleFilter={() => setIsTaskFilterOpen(true)}
+        onSignOut={signOut}
         tasksCount={activeTasks}
       />
       
