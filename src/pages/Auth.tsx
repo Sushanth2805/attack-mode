@@ -38,7 +38,7 @@ const Auth = () => {
           </Link>
           <Link to="/auth/social" className={buttonVariants({ variant: "outline", className: "flex items-center gap-2 hover:bg-secondary/10 transition-colors" })}>
             <Icons.google className="h-5 w-5" />
-            Continue with Email
+            Continue with Gmail
           </Link>
         </div>
       </div>
