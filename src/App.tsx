@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { isNativePlatform } from "@/lib/capacitor";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
@@ -35,32 +35,40 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
+  const [isOAuthFlow, setIsOAuthFlow] = useState(false);
   
   useEffect(() => {
     // Check URL parameters for OAuth callback
     const url = new URL(window.location.href);
     const hasOAuthParams = url.searchParams.has('access_token') || 
-                           url.searchParams.has('error') ||
-                           url.searchParams.has('provider');
+                          url.searchParams.has('error') ||
+                          url.searchParams.has('provider');
     
-    // If we have OAuth params, don't redirect yet as we need to process them
+    // If we have OAuth params, mark this as an OAuth flow
     if (hasOAuthParams) {
+      setIsOAuthFlow(true);
       return;
     }
-    
-    // Otherwise, proceed with normal auth flow
   }, []);
   
+  // Show loading state
   if (isLoading) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
   }
   
+  // If this is an OAuth flow, don't redirect yet - let the Auth component handle it
+  if (isOAuthFlow) {
+    return <>{children}</>;
+  }
+  
+  // If user is authenticated and this isn't an OAuth flow, redirect to home
   if (user) {
     // Redirect to the intended destination or default to home
     const destination = (location.state as any)?.from?.pathname || '/';
     return <Navigate to={destination} replace />;
   }
   
+  // Otherwise, show the auth component
   return <>{children}</>;
 };
 

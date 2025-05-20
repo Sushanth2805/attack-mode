@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,6 +47,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
+    // Check if we're in the middle of an OAuth callback
+    const isOAuthCallback = url.searchParams.has('access_token') || 
+                           url.searchParams.has('error') ||
+                           url.searchParams.has('provider');
+
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event, session?.user?.email);
@@ -54,12 +60,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Handle authentication events
       if (event === 'SIGNED_IN') {
+        // Don't immediately redirect here, we'll handle this separately
         toast.success(`Welcome${session?.user?.email ? ` ${session.user.email}` : ''}!`);
-        // Use window.location for a full page refresh to ensure clean state
-        window.location.href = '/';
+        
+        // If we're not already redirecting and not in an OAuth callback, navigate to home
+        if (!isRedirecting && !isOAuthCallback) {
+          setIsRedirecting(true);
+          // Use a timeout to ensure state is updated before navigation
+          setTimeout(() => {
+            navigate('/', { replace: true });
+            // Reset redirecting flag after a delay
+            setTimeout(() => setIsRedirecting(false), 100);
+          }, 100);
+        }
       } else if (event === 'SIGNED_OUT') {
-        // Use navigate for local navigation
-        navigate('/auth');
+        navigate('/auth', { replace: true });
       } else if (event === 'USER_UPDATED') {
         toast.info('Your profile has been updated');
       } else if (event === 'TOKEN_REFRESHED') {
@@ -68,16 +83,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-      
-      // If we have a session but we're on the auth page, redirect to home
-      if (session && window.location.pathname === '/auth') {
-        window.location.href = '/';
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // If we have a session but we're on the auth page and not in an OAuth flow
+        if (session && window.location.pathname === '/auth' && !isOAuthCallback && !isRedirecting) {
+          setIsRedirecting(true);
+          // Delay to prevent race conditions
+          setTimeout(() => {
+            navigate('/', { replace: true });
+            // Reset redirecting flag after a delay
+            setTimeout(() => setIsRedirecting(false), 100);
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
+        setIsLoading(false);
       }
-    });
+    };
+
+    checkSession();
 
     return () => {
       subscription.unsubscribe();
@@ -86,6 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
+      setIsLoading(true);
       // Clean up auth state
       cleanupAuthState();
       
@@ -94,11 +124,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       toast.success("Logged out successfully");
       
-      // Use window.location for a full page refresh on signout
-      window.location.href = '/auth';
+      // Navigate to auth page
+      navigate('/auth', { replace: true });
     } catch (error) {
       console.error('Error signing out:', error);
       toast.error("Failed to log out");
+    } finally {
+      setIsLoading(false);
     }
   };
 

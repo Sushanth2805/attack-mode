@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -50,34 +49,41 @@ const Auth = () => {
   const [googleAuthInProgress, setGoogleAuthInProgress] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
-  // Check if the URL contains error or success parameters
+  // Process OAuth parameters and clean up URL
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const error = url.searchParams.get('error');
-    const errorDescription = url.searchParams.get('error_description');
+    const processOAuthParams = () => {
+      const url = new URL(window.location.href);
+      const error = url.searchParams.get('error');
+      const errorDescription = url.searchParams.get('error_description');
+      const provider = url.searchParams.get('provider');
+      const access_token = url.searchParams.get('access_token');
+      
+      // If we have OAuth parameters, process them and clean URL
+      if (error || provider || access_token) {
+        if (error) {
+          toast.error(`Authentication error: ${errorDescription || error}`);
+        }
+        
+        // Clean up URL parameters
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+
+    processOAuthParams();
     
-    if (error) {
-      toast.error(`Authentication error: ${errorDescription || error}`);
-      // Clear the error from the URL
-      navigate('/auth', { replace: true });
-    }
-    
-    // Check for successful OAuth redirect
-    const provider = url.searchParams.get('provider');
-    const access_token = url.searchParams.get('access_token');
-    
-    if (provider && access_token) {
-      toast.success("Authentication successful");
-      navigate('/', { replace: true });
-    }
-    
-    // Check for existing user session on page load
+    // If we already have a user and we're not in the middle of OAuth flow, redirect
     if (user) {
-      navigate('/', { replace: true });
+      const redirectTo = (location.state as any)?.from?.pathname || '/';
+      const timeoutId = setTimeout(() => {
+        navigate(redirectTo, { replace: true });
+      }, 300);  // Small delay to prevent immediate redirection
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [navigate, user]);
+  }, [navigate, user, location]);
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -97,6 +103,8 @@ const Auth = () => {
   });
 
   async function onLogin(values: LoginValues) {
+    if (isLoading) return;
+    
     try {
       setIsLoading(true);
       
@@ -108,6 +116,7 @@ const Auth = () => {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (error) {
         // Continue even if this fails
+        console.log("Sign out before login failed:", error);
       }
       
       const { error } = await supabase.auth.signInWithPassword({
@@ -123,7 +132,7 @@ const Auth = () => {
       }
 
       toast.success("Login successful");
-      // Will be redirected by the auth state change handler
+      // Auth state change handler will handle redirection
     } catch (error) {
       toast.error("An unexpected error occurred");
       console.error(error);
@@ -133,6 +142,8 @@ const Auth = () => {
   }
 
   async function onSignup(values: SignupValues) {
+    if (isLoading) return;
+    
     try {
       setIsLoading(true);
       
@@ -169,6 +180,8 @@ const Auth = () => {
   }
 
   async function signInWithGoogle() {
+    if (googleAuthInProgress || isLoading) return;
+    
     try {
       setGoogleAuthInProgress(true);
       
