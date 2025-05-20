@@ -176,8 +176,15 @@ const Index = () => {
     setTaskToEdit(task);
     setIsTaskFormOpen(true);
   };
-  
-  // Removed the welcome message that showed on every page load
+
+  // Function to clear filters
+  const handleClearFilters = () => {
+    setFilters(initialFilters);
+    toast({
+      title: "Filters cleared",
+      description: "All filters have been reset.",
+    });
+  };
   
   // Get the count of incomplete tasks for the header
   const activeTasks = tasks.filter(task => !task.completed).length;
@@ -218,6 +225,7 @@ const Index = () => {
             setTaskToEdit(undefined);
             setIsTaskFormOpen(true);
           }}
+          onClearFilters={handleClearFilters}
           className="mb-20"
         />
       </main>

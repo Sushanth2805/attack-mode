@@ -16,7 +16,7 @@ import {
   SheetTitle, 
   SheetFooter 
 } from "@/components/ui/sheet";
-import { Calendar } from "lucide-react";
+import { Calendar, FilterX } from "lucide-react";
 import { PriorityHigh, PriorityMedium, PriorityLow } from '@/components/PriorityIcons';
 import { FilterOptions } from '@/types/task';
 import { cn } from '@/lib/utils';
@@ -182,7 +182,7 @@ const TaskFilter = ({
                 onClick={() => handleFilterChange('dueDateRange', 'today')}
                 className="flex items-center"
               >
-                <Calendar className="h-4 w-4 mr-1" />
+                <Calendar className="h-4 w-4 mr-1" /> 
                 Today
               </Button>
               <Button
@@ -191,7 +191,7 @@ const TaskFilter = ({
                 onClick={() => handleFilterChange('dueDateRange', 'week')}
                 className="flex items-center"
               >
-                <Calendar className="h-4 w-4 mr-1" />
+                <Calendar className="h-4 w-4 mr-1" /> 
                 Week
               </Button>
             </div>
@@ -219,7 +219,12 @@ const TaskFilter = ({
         </div>
         
         <SheetFooter className="px-6 py-4 border-t flex-row gap-3 sticky bottom-0 bg-white">
-          <Button variant="outline" onClick={handleReset} className="flex-1">
+          <Button 
+            variant="outline" 
+            onClick={handleReset} 
+            className="flex-1 flex items-center justify-center gap-2"
+          >
+            <FilterX className="h-4 w-4" />
             Reset
           </Button>
           <Button onClick={handleApplyFilters} className="flex-1 bg-primary hover:bg-primary-600">

@@ -4,7 +4,7 @@ import { format, isToday, isTomorrow, addDays, isWithinInterval, startOfDay } fr
 import { Task, FilterOptions, Category } from '@/types/task';
 import TaskItem from './TaskItem';
 import EmptyState from './EmptyState';
-import { List } from 'lucide-react';
+import { List, FilterX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TaskListProps {
@@ -15,6 +15,7 @@ interface TaskListProps {
   categories: Category[];
   filters: FilterOptions;
   onAddTask: () => void;
+  onClearFilters: () => void;
   className?: string;
 }
 
@@ -26,6 +27,7 @@ const TaskList = ({
   categories,
   filters,
   onAddTask,
+  onClearFilters,
   className
 }: TaskListProps) => {
   const [showAnimation, setShowAnimation] = useState(true);
@@ -154,6 +156,15 @@ const TaskList = ({
     return grouped;
   }, [filteredTasks]);
 
+  // Check if filters are applied
+  const areFiltersApplied = useMemo(() => {
+    return filters.priority !== 'all' || 
+           filters.categoryId !== 'all' || 
+           filters.completed !== 'all' || 
+           filters.dueDateRange !== 'all' ||
+           (filters.searchQuery && filters.searchQuery.trim() !== '');
+  }, [filters]);
+
   // Show empty state if no tasks match filters
   if (Object.keys(groupedTasks).length === 0) {
     return (
@@ -164,10 +175,10 @@ const TaskList = ({
             ? "Try adjusting your filters to see more tasks." 
             : "Add your first task to get started!"
           }
-          icon={<List size={24} className="text-primary" />}
+          icon={tasks.length > 0 ? <FilterX size={24} className="text-primary" /> : <List size={24} className="text-primary" />}
           action={{
             label: tasks.length > 0 ? "Clear Filters" : "Add Task",
-            onClick: tasks.length > 0 ? () => {} : onAddTask,
+            onClick: tasks.length > 0 ? onClearFilters : onAddTask,
           }}
         />
       </div>
@@ -176,6 +187,17 @@ const TaskList = ({
 
   return (
     <div className={cn("px-4 py-6", className)}>
+      {areFiltersApplied && (
+        <div className="mb-4 flex justify-center">
+          <button 
+            onClick={onClearFilters}
+            className="flex items-center gap-2 px-6 py-2 rounded-md bg-[#9b87f5] hover:bg-[#8975e8] text-white font-medium transition-colors"
+          >
+            <FilterX size={16} />
+            Clear Filters
+          </button>
+        </div>
+      )}
       {Object.entries(groupedTasks).map(([dateGroup, tasksInGroup], groupIndex) => (
         <div key={dateGroup} className={cn(
           "mb-8",
