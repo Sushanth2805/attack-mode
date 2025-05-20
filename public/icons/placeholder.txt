@@ -1,0 +1,21 @@
+
+In a real project, you would need to place actual PNG icon files here with the following sizes:
+- icon-72x72.png
+- icon-96x96.png 
+- icon-128x128.png
+- icon-144x144.png
+- icon-152x152.png
+- icon-192x192.png
+- icon-384x384.png
+- icon-512x512.png
+
+And splash screens for iOS devices:
+- splash-640x1136.png
+- splash-750x1334.png
+- splash-828x1792.png
+- splash-1125x2436.png
+- splash-1242x2688.png
+- splash-1536x2048.png
+- splash-1668x2224.png
+- splash-1668x2388.png
+- splash-2048x2732.png
