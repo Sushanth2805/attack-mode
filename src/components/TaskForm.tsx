@@ -318,7 +318,7 @@ const TaskForm = ({
                             <label
                               htmlFor="low"
                               className={cn(
-                                "inline-flex items-center px-3 py-1.5 rounded-md text-sm cursor-pointer transition-colors",
+                                "inline-flex items-center px-2 py-1.5 rounded-md text-sm cursor-pointer transition-colors",
                                 field.value === "low" 
                                   ? "bg-priority-low text-white" 
                                   : "text-priority-low border border-priority-low hover:bg-green-50"
