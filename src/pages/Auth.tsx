@@ -1,3 +1,4 @@
+
 import { useEffect } from "react"
 import { Icons } from "@/components/icons"
 import { buttonVariants } from "@/components/ui/button"
@@ -25,7 +26,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Logo className="mx-auto mb-4" />
-          <h1 className="text-2xl font-bold">TaskFlow</h1>
+          <h1 className="text-2xl font-bold">Attack Mode</h1>
           <p className="text-gray-500">Manage your tasks on the go</p>
         </div>
         <AuthForm />
