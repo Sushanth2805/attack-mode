@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/useAuth";
 
 // Clean up auth state to prevent authentication limbo
 const cleanupAuthState = () => {
@@ -47,6 +48,25 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Check if the URL contains error or success parameters
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const error = url.searchParams.get('error');
+    const errorDescription = url.searchParams.get('error_description');
+    
+    if (error) {
+      toast.error(`Authentication error: ${errorDescription || error}`);
+      // Clear the error from the URL
+      navigate('/auth', { replace: true });
+    }
+    
+    // Check for existing user session on page load
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [navigate, user]);
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -92,7 +112,7 @@ const Auth = () => {
       }
 
       toast.success("Login successful");
-      navigate("/");
+      navigate("/", { replace: true });
     } catch (error) {
       toast.error("An unexpected error occurred");
       console.error(error);
@@ -144,10 +164,14 @@ const Auth = () => {
       // Clean up existing auth state
       cleanupAuthState();
       
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
 
@@ -155,6 +179,8 @@ const Auth = () => {
         toast.error("Google sign in failed", {
           description: error.message,
         });
+      } else if (data) {
+        console.log("Redirecting to Google auth...", data);
       }
     } catch (error) {
       toast.error("An unexpected error occurred");

@@ -37,11 +37,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (event === 'SIGNED_OUT') {
+      // Handle authentication events
+      if (event === 'SIGNED_IN') {
+        toast.success(`Welcome${session?.user?.email ? ` ${session.user.email}` : ''}!`);
+        navigate('/');
+      } else if (event === 'SIGNED_OUT') {
         navigate('/auth');
+      } else if (event === 'USER_UPDATED') {
+        toast.info('Your profile has been updated');
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('Auth token refreshed');
       }
     });
 

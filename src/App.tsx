@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { isNativePlatform } from "@/lib/capacitor";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
@@ -18,13 +18,15 @@ const queryClient = new QueryClient();
 // Protected route component to handle authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
   
   if (isLoading) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    // Redirect to auth page with the intended destination
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
   
   return <>{children}</>;
@@ -33,13 +35,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 // Auth route component to redirect authenticated users
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
   
   if (isLoading) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
   }
   
   if (user) {
-    return <Navigate to="/" replace />;
+    // Redirect to the intended destination or default to home
+    const destination = (location.state as any)?.from?.pathname || '/';
+    return <Navigate to={destination} replace />;
   }
   
   return <>{children}</>;
@@ -76,7 +81,7 @@ const App = () => {
           <QueryClientProvider client={queryClient}>
             <TooltipProvider>
               <Toaster />
-              <Sonner />
+              <Sonner position="top-center" closeButton richColors />
               <AppRoutes />
             </TooltipProvider>
           </QueryClientProvider>
