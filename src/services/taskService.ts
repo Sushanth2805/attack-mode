@@ -2,6 +2,20 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Task, TaskFormData, Category } from "@/types/task";
 
+// Helper function to convert database task to frontend task
+const mapDbTaskToTask = (dbTask: any): Task => ({
+  id: dbTask.id,
+  title: dbTask.title,
+  description: dbTask.description || undefined,
+  dueDate: dbTask.due_date ? new Date(dbTask.due_date) : null,
+  priority: dbTask.priority,
+  completed: dbTask.completed,
+  categoryId: dbTask.category_id || undefined,
+  createdAt: new Date(dbTask.created_at),
+  updatedAt: new Date(dbTask.updated_at),
+  userId: dbTask.user_id,
+});
+
 // Fetch tasks for the current user
 export const fetchTasks = async (): Promise<Task[]> => {
   const { data, error } = await supabase
@@ -14,13 +28,7 @@ export const fetchTasks = async (): Promise<Task[]> => {
     throw error;
   }
 
-  // Convert date strings to Date objects
-  return data.map(task => ({
-    ...task,
-    dueDate: task.due_date ? new Date(task.due_date) : null,
-    createdAt: new Date(task.created_at),
-    updatedAt: new Date(task.updated_at),
-  }));
+  return data.map(mapDbTaskToTask);
 };
 
 // Create a new task
@@ -30,7 +38,7 @@ export const createTask = async (taskData: TaskFormData): Promise<Task> => {
     .insert({
       title: taskData.title,
       description: taskData.description,
-      due_date: taskData.dueDate,
+      due_date: taskData.dueDate ? taskData.dueDate.toISOString() : null,
       priority: taskData.priority,
       category_id: taskData.categoryId
     })
@@ -42,12 +50,7 @@ export const createTask = async (taskData: TaskFormData): Promise<Task> => {
     throw error;
   }
 
-  return {
-    ...data,
-    dueDate: data.due_date ? new Date(data.due_date) : null,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
-  };
+  return mapDbTaskToTask(data);
 };
 
 // Update an existing task
@@ -57,10 +60,10 @@ export const updateTask = async (id: string, taskData: TaskFormData): Promise<Ta
     .update({
       title: taskData.title,
       description: taskData.description,
-      due_date: taskData.dueDate,
+      due_date: taskData.dueDate ? taskData.dueDate.toISOString() : null,
       priority: taskData.priority,
       category_id: taskData.categoryId,
-      updated_at: new Date()
+      updated_at: new Date().toISOString()
     })
     .eq('id', id)
     .select()
@@ -71,12 +74,7 @@ export const updateTask = async (id: string, taskData: TaskFormData): Promise<Ta
     throw error;
   }
 
-  return {
-    ...data,
-    dueDate: data.due_date ? new Date(data.due_date) : null,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
-  };
+  return mapDbTaskToTask(data);
 };
 
 // Toggle task completion status
@@ -85,7 +83,7 @@ export const toggleTaskComplete = async (id: string, completed: boolean): Promis
     .from('tasks')
     .update({
       completed,
-      updated_at: new Date()
+      updated_at: new Date().toISOString()
     })
     .eq('id', id)
     .select()
@@ -96,12 +94,7 @@ export const toggleTaskComplete = async (id: string, completed: boolean): Promis
     throw error;
   }
 
-  return {
-    ...data,
-    dueDate: data.due_date ? new Date(data.due_date) : null,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
-  };
+  return mapDbTaskToTask(data);
 };
 
 // Delete a task
