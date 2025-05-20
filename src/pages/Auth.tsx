@@ -22,23 +22,23 @@ const Auth = () => {
   }, [user, navigate])
 
   return (
-    <Shell className="grid h-screen place-items-center" showThemeToggle={true}>
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <Logo className="mx-auto mb-4" />
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">Attack Mode</h1>
-          <p className="text-muted-foreground">Manage your tasks on the go</p>
+    <Shell className="grid h-screen place-items-center bg-gradient-to-b from-slate-50 to-slate-100">
+      <div className="w-full max-w-md p-6 bg-white rounded-xl shadow-sm border border-slate-100">
+        <div className="mb-6 text-center">
+          <Logo className="mx-auto mb-4 h-12 w-12" />
+          <h1 className="text-2xl font-bold text-slate-800">Attack Mode</h1>
+          <p className="text-slate-500 text-sm">Manage your tasks on the go</p>
         </div>
         <AuthForm />
         <Separator className="my-6" />
         <div className="grid gap-3">
-          <Link to="/auth/social" className={buttonVariants({ variant: "outline", className: "flex items-center gap-2 hover:bg-secondary transition-colors" })}>
+          <Link to="/auth/social" className={buttonVariants({ variant: "outline", className: "flex items-center gap-2 hover:bg-secondary/10 transition-colors" })}>
             <Icons.gitHub className="h-5 w-5" />
             Continue with GitHub
           </Link>
-          <Link to="/auth/social" className={buttonVariants({ variant: "outline", className: "flex items-center gap-2 hover:bg-secondary transition-colors" })}>
-            <Icons.google className="h-5 w-5" />
-            Continue with Google
+          <Link to="/auth/social" className={buttonVariants({ variant: "outline", className: "flex items-center gap-2 hover:bg-secondary/10 transition-colors" })}>
+            <Icons.mail className="h-5 w-5" />
+            Continue with Email
           </Link>
         </div>
       </div>

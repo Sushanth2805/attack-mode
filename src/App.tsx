@@ -101,7 +101,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <React.StrictMode>
-        <ThemeProvider defaultTheme="system">
+        <ThemeProvider>
           <AuthProvider>
             <QueryClientProvider client={queryClient}>
               <TooltipProvider>
