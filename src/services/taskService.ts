@@ -33,6 +33,14 @@ export const fetchTasks = async (): Promise<Task[]> => {
 
 // Create a new task
 export const createTask = async (taskData: TaskFormData): Promise<Task> => {
+  // Get the current user session
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session?.user) {
+    throw new Error('User must be logged in to create tasks');
+  }
+  
+  const userId = sessionData.session.user.id;
+  
   const { data, error } = await supabase
     .from('tasks')
     .insert({
@@ -40,7 +48,8 @@ export const createTask = async (taskData: TaskFormData): Promise<Task> => {
       description: taskData.description,
       due_date: taskData.dueDate ? taskData.dueDate.toISOString() : null,
       priority: taskData.priority,
-      category_id: taskData.categoryId
+      category_id: taskData.categoryId,
+      user_id: userId
     })
     .select()
     .single();
@@ -127,11 +136,20 @@ export const fetchCategories = async (): Promise<Category[]> => {
 
 // Create a new category
 export const createCategory = async (categoryData: { name: string; color?: string }): Promise<Category> => {
+  // Get the current user session
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session?.user) {
+    throw new Error('User must be logged in to create categories');
+  }
+  
+  const userId = sessionData.session.user.id;
+
   const { data, error } = await supabase
     .from('categories')
     .insert({
       name: categoryData.name,
-      color: categoryData.color
+      color: categoryData.color,
+      user_id: userId
     })
     .select()
     .single();
