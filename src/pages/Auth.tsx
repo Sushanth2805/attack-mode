@@ -22,23 +22,23 @@ const Auth = () => {
   }, [user, navigate])
 
   return (
-    <Shell className="grid h-screen place-items-center">
+    <Shell className="grid h-screen place-items-center" showThemeToggle={true}>
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Logo className="mx-auto mb-4" />
-          <h1 className="text-2xl font-bold">Attack Mode</h1>
-          <p className="text-gray-500">Manage your tasks on the go</p>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">Attack Mode</h1>
+          <p className="text-muted-foreground">Manage your tasks on the go</p>
         </div>
         <AuthForm />
-        <Separator className="my-4" />
-        <div className="grid gap-2">
-          <Link to="/auth/social" className={buttonVariants({ variant: "outline" })}>
-            <Icons.gitHub className="mr-2 h-4 w-4" />
-            GitHub
+        <Separator className="my-6" />
+        <div className="grid gap-3">
+          <Link to="/auth/social" className={buttonVariants({ variant: "outline", className: "flex items-center gap-2 hover:bg-secondary transition-colors" })}>
+            <Icons.gitHub className="h-5 w-5" />
+            Continue with GitHub
           </Link>
-          <Link to="/auth/social" className={buttonVariants({ variant: "outline" })}>
-            <Icons.google className="mr-2 h-4 w-4" />
-            Google
+          <Link to="/auth/social" className={buttonVariants({ variant: "outline", className: "flex items-center gap-2 hover:bg-secondary transition-colors" })}>
+            <Icons.google className="h-5 w-5" />
+            Continue with Google
           </Link>
         </div>
       </div>

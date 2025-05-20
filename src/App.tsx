@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -7,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { useEffect, useState } from "react";
 import { isNativePlatform } from "@/lib/capacitor";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/hooks/useTheme";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -99,15 +101,17 @@ const App = () => {
   return (
     <BrowserRouter>
       <React.StrictMode>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner position="top-center" closeButton richColors />
-              <AppRoutes />
-            </TooltipProvider>
-          </QueryClientProvider>
-        </AuthProvider>
+        <ThemeProvider defaultTheme="system">
+          <AuthProvider>
+            <QueryClientProvider client={queryClient}>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner position="top-center" closeButton richColors />
+                <AppRoutes />
+              </TooltipProvider>
+            </QueryClientProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </React.StrictMode>
     </BrowserRouter>
   );

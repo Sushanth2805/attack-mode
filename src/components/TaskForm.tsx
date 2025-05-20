@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Plus } from 'lucide-react';
 import { PriorityHigh, PriorityMedium, PriorityLow } from '@/components/PriorityIcons';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -169,9 +168,9 @@ const TaskForm = ({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[500px] p-0">
+        <DialogContent className="sm:max-w-[500px] p-0 dark:border-gray-800">
           <DialogHeader className="p-6 pb-2">
-            <DialogTitle>
+            <DialogTitle className="text-xl">
               {isEditMode ? "Edit Task" : "Create New Task"}
             </DialogTitle>
           </DialogHeader>
@@ -269,14 +268,14 @@ const TaskForm = ({
                           onValueChange={(value) => {
                             if (value) field.onChange(value);
                           }}
-                          className="justify-between border rounded-md p-1"
+                          className="justify-between border rounded-md p-1 dark:border-gray-700"
                         >
                           <ToggleGroupItem 
                             value="high" 
                             aria-label="High Priority"
                             className={cn(
-                              "data-[state=on]:text-white data-[state=on]:bg-priority-high flex-1 px-3",
-                              field.value !== "high" && "text-priority-high"
+                              "data-[state=on]:text-white data-[state=on]:bg-priority-high rounded-md transition-all",
+                              field.value !== "high" ? "text-priority-high hover:bg-red-50 dark:hover:bg-red-950/30" : ""
                             )}
                           >
                             <PriorityHigh className="h-4 w-4 mr-1" />
@@ -286,8 +285,8 @@ const TaskForm = ({
                             value="medium" 
                             aria-label="Medium Priority"
                             className={cn(
-                              "data-[state=on]:text-white data-[state=on]:bg-priority-medium flex-1 px-3",
-                              field.value !== "medium" && "text-priority-medium"
+                              "data-[state=on]:text-white data-[state=on]:bg-priority-medium rounded-md transition-all",
+                              field.value !== "medium" ? "text-priority-medium hover:bg-amber-50 dark:hover:bg-amber-950/30" : ""
                             )}
                           >
                             <PriorityMedium className="h-4 w-4 mr-1" />
@@ -297,8 +296,8 @@ const TaskForm = ({
                             value="low" 
                             aria-label="Low Priority"
                             className={cn(
-                              "data-[state=on]:text-white data-[state=on]:bg-priority-low flex-1 px-3",
-                              field.value !== "low" && "text-priority-low"
+                              "data-[state=on]:text-white data-[state=on]:bg-priority-low rounded-md transition-all",
+                              field.value !== "low" ? "text-priority-low hover:bg-green-50 dark:hover:bg-green-950/30" : ""
                             )}
                           >
                             <PriorityLow className="h-4 w-4 mr-1" />
@@ -324,23 +323,25 @@ const TaskForm = ({
                           value={field.value}
                           onValueChange={field.onChange}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="dark:border-gray-700">
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="dark:border-gray-700">
                             {categories.map((category) => (
                               <SelectItem 
                                 key={category.id}
                                 value={category.id}
                                 className="flex items-center gap-2"
                               >
-                                {category.color && (
-                                  <div 
-                                    className="w-3 h-3 rounded-full" 
-                                    style={{ backgroundColor: category.color }} 
-                                  />
-                                )}
-                                {category.name}
+                                <div className="flex items-center gap-2">
+                                  {category.color && (
+                                    <div 
+                                      className="w-3 h-3 rounded-full" 
+                                      style={{ backgroundColor: category.color }} 
+                                    />
+                                  )}
+                                  {category.name}
+                                </div>
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -351,6 +352,7 @@ const TaskForm = ({
                         variant="outline" 
                         size="icon" 
                         onClick={() => setIsAddCategoryDialogOpen(true)}
+                        className="dark:border-gray-700 dark:hover:bg-gray-800"
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -364,7 +366,7 @@ const TaskForm = ({
           
           <DialogFooter className="p-6 pt-4">
             <DialogClose asChild>
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" className="dark:border-gray-700 dark:hover:bg-gray-800">
                 Cancel
               </Button>
             </DialogClose>
@@ -383,7 +385,7 @@ const TaskForm = ({
         open={isAddCategoryDialogOpen} 
         onOpenChange={setIsAddCategoryDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="dark:border-gray-800">
           <AlertDialogHeader>
             <AlertDialogTitle>Add New Category</AlertDialogTitle>
             <AlertDialogDescription>
@@ -401,6 +403,7 @@ const TaskForm = ({
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="Enter category name"
+                className="dark:border-gray-700"
               />
             </div>
             
@@ -416,7 +419,7 @@ const TaskForm = ({
                     onClick={() => setNewCategoryColor(color)}
                     className={cn(
                       "w-8 h-8 rounded-full transition-all",
-                      newCategoryColor === color ? "ring-2 ring-black ring-offset-2" : ""
+                      newCategoryColor === color ? "ring-2 ring-foreground dark:ring-white ring-offset-2" : ""
                     )}
                     style={{ backgroundColor: color }}
                     aria-label={`Select ${color} color`}
@@ -427,7 +430,7 @@ const TaskForm = ({
           </div>
           
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="dark:border-gray-700 dark:hover:bg-gray-800">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleAddCategory}
               disabled={!newCategoryName.trim()}
