@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { 
@@ -37,6 +38,7 @@ const TaskItem = ({
 }: TaskItemProps) => {
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isTouched, setIsTouched] = useState(false);
 
   const handleToggle = () => {
     onToggleComplete(task.id, !task.completed);
@@ -72,11 +74,15 @@ const TaskItem = ({
   return (
     <div 
       className={cn(
-        "bg-white rounded-xl p-4 shadow-sm border mb-3 transition-all duration-300 task-item-appear overflow-hidden",
+        "bg-white rounded-xl p-4 shadow-sm border mb-3 transition-all duration-300 task-item-appear overflow-hidden tap-highlight",
         task.completed && "opacity-70",
         isDeleting && "h-0 opacity-0 p-0 mb-0 border-0",
+        isTouched && "bg-gray-50",
         className
       )}
+      onTouchStart={() => setIsTouched(true)}
+      onTouchEnd={() => setTimeout(() => setIsTouched(false), 150)}
+      onTouchCancel={() => setIsTouched(false)}
     >
       <div className="flex items-start gap-3">
         <div className="pt-0.5">
@@ -84,7 +90,7 @@ const TaskItem = ({
             checked={task.completed} 
             onCheckedChange={handleToggle}
             className={cn(
-              "rounded-full transition-colors border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary",
+              "rounded-full transition-colors border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary h-5 w-5", // Slightly larger for mobile touch
               priorityColors[task.priority]
             )}
           />
